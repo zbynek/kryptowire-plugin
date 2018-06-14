@@ -1,0 +1,44 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
+    <l:layout title="Kryptowire Scan Results" norefresh="true">
+        <l:side-panel>
+            <st:include page="sidepanel.jelly" it="${it.run}" optional="true" />
+        </l:side-panel>
+        <l:main-panel>
+            <j:choose>
+                <j:when test="${it.status.complete==false}">
+                    <h1>Security scan in progress... Please check back later.</h1>
+                </j:when>
+                <j:when test="${it.status.complete==true}">
+                    <h1 class="build-caption page-headline">
+                        <img
+                                src="${rootURL}/plugin/aerogear-kryptowire-plugin/menu-logo.png"
+                                alt="kryptowire logo"
+                                tooltip="kryptowire"
+                                style="width: 48px; height: 48px;"
+                                class="icon-blue icon-xlg"
+                                title="kryptowire" />
+                        <span style="color:#7D7F80">Krypto</span><span style="color:#00B951">wire</span>
+                    </h1>
+                    <br />
+                    <h2>
+                        <img
+                                src="${rootURL}/plugin/aerogear-kryptowire-plugin/${it.info.platform}-logo.png"
+                                alt="${it.info.platform} logo"
+                                tooltip="${it.info.platform}"
+                                style="width: 48px; height: 48px;"
+                                title="${it.info.platform}" />
+                        ${it.info.pkg}
+                    </h2>
+                    <h3 style="color:#009102">
+                        Threat Score: ${it.status.score}
+                    </h3>
+                    <p><strong>App Version:</strong> ${it.info.version}</p>
+                    <p><strong>Submitted:</strong> ${it.status.submittedAt}</p>
+                    <p>
+                        <a target="_blank" href="${it.externalLink}">Full Kryptowire Report</a></p>
+                </j:when>
+            </j:choose>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>

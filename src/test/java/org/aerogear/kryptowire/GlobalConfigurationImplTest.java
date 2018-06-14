@@ -16,6 +16,8 @@ public class GlobalConfigurationImplTest {
     @Rule public JenkinsRule j = new JenkinsRule();
     private static Logger log = Logger.getLogger(GlobalConfigurationImplTest.class.getName());
 
+    public GlobalConfigurationImplTest() {}
+
     @Test
     public void ShouldAssertDevaultValues() throws  Exception {
         HtmlPage configPage = j.createWebClient().goTo("configure");
