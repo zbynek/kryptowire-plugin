@@ -2,11 +2,14 @@ package org.aerogear.kryptowire.workflow;
 
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.GlobalConfiguration;
+import org.aerogear.kryptowire.BinaryInfo;
 import org.aerogear.kryptowire.GlobalConfigurationImpl;
 import org.aerogear.kryptowire.KryptowireService;
 import org.aerogear.kryptowire.KryptowireServiceImpl;
+import org.aerogear.kryptowire.BinaryHistoryAction;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -77,10 +80,17 @@ public class KWSubmitStep extends AbstractStepImpl {
         @StepContextParameter
         transient TaskListener listener;
 
+        @StepContextParameter
+        private transient Run build;
+
         @Override
         protected Void run() throws Exception {
 
             GlobalConfigurationImpl pluginConfig = GlobalConfiguration.all().get(GlobalConfigurationImpl.class);
+
+            if (pluginConfig == null) {
+                throw new RuntimeException("[Error] Could not retrieve global Kryptowire config object.");
+            }
 
             String kwEndpoint = pluginConfig.getKwEndpoint();
             String kwApiKey = pluginConfig.getKwApiKey();
@@ -93,14 +103,26 @@ public class KWSubmitStep extends AbstractStepImpl {
 
             listener.getLogger().println(" --- Kryptowire submit Start ---");
             listener.getLogger().println("kwSubmit: " + step.platform + " : " + step.filePath);
+
             KryptowireService kws = new KryptowireServiceImpl(kwEndpoint,  kwApiKey);
+
             JSONObject resp = kws.submit(step.platform, fp);
+
+            String uuid = resp.getString("uuid");
+            String platform = resp.getString("platform");
+            String pkg = resp.getString("package");
+            String version = resp.getString("version");
+            String hash = resp.getString("hash");
+
             listener.getLogger().println("kw msg: " + resp.get("msg"));
-            listener.getLogger().println("kw uuid: " + resp.get("uuid"));
-            listener.getLogger().println("kw platform: " + resp.get("platform"));
-            listener.getLogger().println("kw package: " + resp.get("package"));
-            listener.getLogger().println("kw version: " + resp.get("version"));
-            listener.getLogger().println("kw hash: " + resp.get("hash"));
+            listener.getLogger().println("kw uuid: " + uuid);
+            listener.getLogger().println("kw platform: " + platform);
+            listener.getLogger().println("kw package: " + pkg);
+            listener.getLogger().println("kw version: " + version);
+            listener.getLogger().println("kw hash: " + hash);
+
+            BinaryInfo info = BinaryInfo.fromJSONObject(resp);
+            build.addAction(new BinaryHistoryAction(info));
 
             listener.getLogger().println(" --- Kryptowire submit Done ---");
 

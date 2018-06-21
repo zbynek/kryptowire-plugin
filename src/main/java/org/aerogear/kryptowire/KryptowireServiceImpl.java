@@ -4,11 +4,13 @@ import hudson.FilePath;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.HttpClients;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -19,15 +21,22 @@ public class KryptowireServiceImpl implements KryptowireService {
     private static final Logger logger = Logger.getLogger(KryptowireServiceImpl.class.getName());
 
     private String apiKey;
-
     private String apiEndpoint;
+    private HttpClient httpclient;
 
-    public KryptowireServiceImpl(String apiEndpoint, String apiKey) {
-        if (this.apiEndpoint != null && !this.apiEndpoint.isEmpty() && !this.apiEndpoint.endsWith("/")) {
-            this.apiEndpoint += "/";
-        }
+    public KryptowireServiceImpl(String apiEndpoint, String apiKey, HttpClient httpclient) {
         this.apiEndpoint = apiEndpoint;
         this.apiKey = apiKey;
+        this.httpclient = httpclient;
+        if (this.apiEndpoint != null) {
+            if (!this.apiEndpoint.isEmpty() && !this.apiEndpoint.endsWith("/")) {
+                this.apiEndpoint += "/";
+            }
+        }
+    }
+
+    public KryptowireServiceImpl(String apiEndpoint, String apiKey) {
+        this(apiEndpoint, apiKey, HttpClients.createDefault());
     }
 
     public String getApiKey() {
@@ -38,9 +47,18 @@ public class KryptowireServiceImpl implements KryptowireService {
         return apiEndpoint;
     }
 
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public void setApiEndpoint(String apiEndpoint) {
+        this.apiEndpoint = apiEndpoint;
+    }
+
     @Override
     public JSONObject submit(String platform, FilePath filePath) throws IOException, InterruptedException {
-        String endPointUrl = getApiEndpoint() + "/submit";
+        String endPointUrl = getApiEndpoint() + "/api/submit";
 
         HttpPost post = new HttpPost(endPointUrl);
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
@@ -51,11 +69,60 @@ public class KryptowireServiceImpl implements KryptowireService {
         HttpEntity entity = builder.build();
         post.setEntity(entity);
 
-        HttpClient httpclient = HttpClients.createDefault();
-
         ResponseHandler<String> handler = new BasicResponseHandler();
         String responseBody = httpclient.execute(post, handler);
         return new JSONObject(responseBody);
     }
 
+    @Override
+    public AnalysisStatus getStatus(String hash) throws IOException, InterruptedException {
+        String endPointUrl = getApiEndpoint() + "/api/status?key=" + getApiKey() + "&hash=" + hash;
+
+        HttpGet get = new HttpGet(endPointUrl);
+
+        ResponseHandler<String> handler = new BasicResponseHandler();
+        String responseBody = httpclient.execute(get, handler);
+
+        JSONObject res = new JSONObject(responseBody);
+
+        String status = res.getString("status");
+
+        if (status.equals("processing")) {
+            return AnalysisStatus.PROCESSING;
+        }
+
+        if (status.equals("not_submitted")) {
+            return AnalysisStatus.NOT_SUBMITTED;
+        }
+
+        return AnalysisStatus.COMPLETE;
+    }
+
+    @Override
+    public JSONObject getResult(String uuid) throws IOException, InterruptedException {
+        String endPointUrl = getApiEndpoint() + "/api/submitted-apps?key=" + getApiKey();
+
+        HttpGet get = new HttpGet(endPointUrl);
+
+        ResponseHandler<String> handler = new BasicResponseHandler();
+        String responseBody = httpclient.execute(get, handler);
+
+        JSONArray arr = new JSONArray(responseBody);
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject item = arr.getJSONObject(i);
+            if (item.isNull("uuid")) {
+                continue;
+            }
+
+            if (item.getString("uuid").equals(uuid)) {
+                return item;
+            }
+        }
+
+        return new JSONObject("{}");
+    }
+
+    public boolean isCompleted(String hash) throws IOException, InterruptedException {
+        return this.getStatus(hash) == AnalysisStatus.COMPLETE;
+    }
 }
