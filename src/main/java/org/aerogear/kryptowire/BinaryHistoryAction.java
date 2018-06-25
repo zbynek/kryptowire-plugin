@@ -4,6 +4,8 @@ import hudson.model.*;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.RunAction2;
 import org.json.JSONObject;
+
+import java.io.File;
 import java.io.IOException;
 
 
@@ -78,6 +80,13 @@ public class BinaryHistoryAction implements RunAction2 {
             return BinaryStatus.notReady();
         }
         this.status = BinaryStatus.fromJSONObject(out);
+
+        File targetFile = new File(getRun().getArtifactsDir() + "/kryptowire.pdf");
+        kws.downloadReport(this.info.getHash(), "pdf", targetFile);
+
+        targetFile = new File(getRun().getArtifactsDir() + "/kryptowire-niap.pdf");
+        kws.downloadReport(this.info.getHash(), "niap_pdf", targetFile);
+
         this.getRun().save();
         return this.status;
     }

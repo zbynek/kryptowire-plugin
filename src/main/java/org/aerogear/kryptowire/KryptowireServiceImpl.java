@@ -1,8 +1,12 @@
 package org.aerogear.kryptowire;
 
 import hudson.FilePath;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -13,7 +17,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.logging.Logger;
 
 public class KryptowireServiceImpl implements KryptowireService {
@@ -120,6 +124,25 @@ public class KryptowireServiceImpl implements KryptowireService {
         }
 
         return new JSONObject("{}");
+    }
+
+    @Override
+    public void downloadReport(String hash, String type, File targetFile) throws IOException, InterruptedException {
+        String endPointUrl = getApiEndpoint() + "/api/results/" + type + "?key=" + getApiKey() + "&hash=" + hash;
+
+        HttpGet get = new HttpGet(endPointUrl);
+
+        HttpResponse response = httpclient.execute(get);
+
+        StatusLine statusLine = response.getStatusLine();
+        if (statusLine.getStatusCode() >= 300) {
+            throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+        }
+
+        HttpEntity entity = response.getEntity();
+        if (entity != null) {
+            FileUtils.copyInputStreamToFile(entity.getContent(), targetFile);
+        }
     }
 
     public boolean isCompleted(String hash) throws IOException, InterruptedException {
