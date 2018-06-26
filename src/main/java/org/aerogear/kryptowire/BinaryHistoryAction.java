@@ -2,11 +2,14 @@ package org.aerogear.kryptowire;
 
 import hudson.model.*;
 import jenkins.model.GlobalConfiguration;
+import jenkins.model.Jenkins;
 import jenkins.model.RunAction2;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.List;
 
 
 public class BinaryHistoryAction implements RunAction2 {
@@ -100,10 +103,23 @@ public class BinaryHistoryAction implements RunAction2 {
         return cfg.getKwEndpoint() + "/#/" + info.getPlatform() + "-report/" + info.getUuid();
     }
 
-    public GlobalConfigurationImpl getCfg() {
+    private GlobalConfigurationImpl getCfg() {
          if (this.cfg == null) {
              this.cfg = GlobalConfiguration.all().get(GlobalConfigurationImpl.class);
          }
          return this.cfg;
+    }
+
+    public String getReportPath()  {
+        return getArchivePath("kryptowire.pdf");
+    }
+
+    public String getNIAPReportPath() {
+        return getArchivePath("kryptowire-niap.pdf");
+    }
+
+    private String getArchivePath(String path)  {
+        String rootUrl = Jenkins.getActiveInstance().getRootUrl();
+        return rootUrl + getRun().getUrl() + "artifact/" + path;
     }
 }
