@@ -7,8 +7,9 @@ An opensource jenkins plugin that sends mobile app binaries to kryptowire platfo
 | License:        | Apache License, Version 2.0                      |
 | Issue tracker:  | https://issues.jboss.org/browse/AGDIGGER         |
 | Google Group:   | https://groups.google.com/forum/#!forum/aerogear |
-| IRC             | [#aerogear]https://webchat.freenode.net/?channels=aerogear channel in the [freenode](http://freenode.net/) network. |
+| IRC             | [#aerogear](https://webchat.freenode.net/?channels=aerogear) channel in the [freenode](http://freenode.net/) network. |
 
+User facing docs cane be found [here](./docs).
 
 ## Development Instructions
 
