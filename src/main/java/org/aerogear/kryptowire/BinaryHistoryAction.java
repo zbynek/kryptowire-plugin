@@ -82,10 +82,14 @@ public class BinaryHistoryAction implements RunAction2 {
         this.status = BinaryStatus.fromJSONObject(out);
 
         File targetFile = new File(getRun().getArtifactsDir() + "/kryptowire.pdf");
-        kws.downloadReport(this.info.getHash(), "pdf", targetFile);
+        if(!targetFile.exists()) {
+            kws.downloadReport(this.info.getHash(), "pdf", targetFile);
+        }
 
         targetFile = new File(getRun().getArtifactsDir() + "/kryptowire-niap.pdf");
-        kws.downloadReport(this.info.getHash(), "niap_pdf", targetFile);
+        if(!targetFile.exists()) {
+            kws.downloadReport(this.info.getHash(), "niap_pdf", targetFile);
+        }
 
         this.getRun().save();
         return this.status;
