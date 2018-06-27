@@ -8,7 +8,7 @@
         <relativePath />
     </parent>
     <groupId>io.jenkins.plugins</groupId>
-    <artifactId>aerogear-kryptowire-plugin</artifactId>
+    <artifactId>kryptowire</artifactId>
     <version>0.2-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <properties>
@@ -17,7 +17,7 @@
         <jenkins-test-harness.version>2.13</jenkins-test-harness.version>
         <workflow.version>2.0</workflow.version>
     </properties>
-    <name>Aerogear Kryptowire Jenkins Plugin</name>
+    <name>Kryptowire Plugin</name>
     <description>Jenkins plugin that sends a mobile app binary to the kryptowire platform for security analysis</description>
     <licenses>
         <license>
