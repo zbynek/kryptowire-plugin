@@ -35,11 +35,11 @@ The plugin adds a dsl function that can be used in a Jenkins pipeline script to 
 
 Params:
 
-* path: your mobile app binary path
+* filePath: your mobile app binary path
 * platform: the application mobile platform (`ios` or `android`)
 
 ```groovy
-kwSubmit path: '/path/to/my/app-binary' platform: 'android'
+kwSubmit filePath: '/path/to/my/app-binary' platform: 'android'
 ```
 
 Sample android (debug build) pipeline script (assumes you have a pre-configured android node):
