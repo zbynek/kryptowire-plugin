@@ -35,7 +35,7 @@ public class BinaryHistoryAction implements RunAction2 {
 
     @Override
     public String getIconFileName() {
-        return "/plugin/aerogear-kryptowire-plugin/menu-logo.png";
+        return "/plugin/kryptowire/menu-logo.png";
     }
 
     @Override
